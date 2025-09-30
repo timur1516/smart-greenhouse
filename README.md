@@ -1,5 +1,3 @@
-<img width="1790" height="442" alt="image" src="https://github.com/user-attachments/assets/2d8cb9ac-3daa-40ae-9c33-1f53995b2ee1" />
-
 # Автоматизированная система управления теплицей
 
 ## Общие сведения
