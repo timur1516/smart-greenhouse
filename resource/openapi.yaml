@@ -1,0 +1,89 @@
+openapi: 3.0.3
+info:
+  title: Device API
+  version: 1.0.0
+  description: API для взаимодействия с устройствами
+paths:
+  /sensor/{dev-id}:
+    get:
+      summary: Получить значение сенсора
+      parameters:
+        - name: dev-id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Идентификатор устройства
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: number
+                    format: float
+                    example: 23.5
+  /external/{dev-id}:
+    post:
+      summary: Установить уровень внешнего устройства
+      parameters:
+        - name: dev-id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Идентификатор устройства
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                level:
+                  type: integer
+                  minimum: 0
+                  maximum: 255
+                  example: 128
+              required:
+                - level
+      responses:
+        '200':
+          description: Успешно обновлено
+  /info:
+    get:
+      summary: Получить информацию о модуле и устройствах
+      responses:
+        '200':
+          description: Информация о модуле
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  module-id:
+                    type: integer
+                    example: 1
+                  dev-list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "sensor-01"
+                        type:
+                          type: integer
+                          description: 0 - input, 1 - output
+                          enum: [0, 1]
+                          example: 0
+                      required:
+                        - id
+                        - name
+                        - type
