@@ -4,19 +4,133 @@ info:
   version: 1.0.0
   description: API для взаимодействия с устройствами
 paths:
-  /sensor/{dev-id}:
+  /info:
     get:
-      summary: Получить значение сенсора
+      summary: Получить информацию о модуле
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  module-id:
+                    type: integer
+                    example: 1
+  /drivers:
+    get:
+      summary: Список поддерживаемых драйверов
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  drivers:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        name:
+                          type: string
+                          example: "DHT22"
+                        type:
+                          type: integer
+                          description: 0 - analog input, 1 - digital input, 2 - output
+                          enum: [0, 1, 2]
+                          example: 0
+  /ports:
+    get:
+      summary: Список доступных портов
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          example: 1
+                        type:
+                          type: integer
+                          description: 0 - analog input, 1 - digital input, 2 - output
+                          enum: [0, 1, 2]
+                          example: 0
+  /ports/{port}/bind:
+    put:
+      summary: Привязать драйвер к порту
       parameters:
-        - name: dev-id
+        - name: port
           in: path
           required: true
           schema:
-            type: string
-          description: Идентификатор устройства
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                driverId:
+                  type: integer
+                  example: 1
+              required: [driverId]
       responses:
         '200':
-          description: Успешный ответ
+          description: OK
+        '409':
+          description: Драйвер несовметим с типом порта
+        '422':
+          description: Драйвер или порт не найден
+    get:
+      summary: Получить информацию о привязанном драйвере
+      parameters:
+        - name: port
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  driverId:
+                    type: integer
+                    example: 1
+        '400':
+          description: Порт не ривязан к драйверу
+        '422':
+          description: Порт не найден
+  /ports/{port}/control:
+    get:
+      summary: Прочитать значение с внешнего устройства
+      parameters:
+        - name: port
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
           content:
             application/json:
               schema:
@@ -26,16 +140,18 @@ paths:
                     type: number
                     format: float
                     example: 23.5
-  /external/{dev-id}:
+        '400':
+          description: Порт не привязан к драйверу
+        '405':
+          description: Метод не поддерживается устройством
     post:
-      summary: Установить уровень внешнего устройства
+      summary: Подать напряжение на внешнее устройство
       parameters:
-        - name: dev-id
+        - name: port
           in: path
           required: true
           schema:
-            type: string
-          description: Идентификатор устройства
+            type: integer
       requestBody:
         required: true
         content:
@@ -52,38 +168,8 @@ paths:
                 - level
       responses:
         '200':
-          description: Успешно обновлено
-  /info:
-    get:
-      summary: Получить информацию о модуле и устройствах
-      responses:
-        '200':
-          description: Информация о модуле
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  module-id:
-                    type: integer
-                    example: 1
-                  dev-list:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        id:
-                          type: integer
-                          example: 1
-                        name:
-                          type: string
-                          example: "sensor-01"
-                        type:
-                          type: integer
-                          description: 0 - input, 1 - output
-                          enum: [0, 1]
-                          example: 0
-                      required:
-                        - id
-                        - name
-                        - type
+          description: OK
+        '400':
+          description: Порт не привязан к драйверу
+        '405':
+          description: Метод не поддерживается устройством
